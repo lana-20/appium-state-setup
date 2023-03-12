@@ -35,11 +35,10 @@ We can create the possibility for the equivalent of variables here too. Tappin
 **Cons**:
 1. One drawback of this approach is that we'll need a test-only version of the app. You don't want to ship the Test Nexus to users. 
 2. The other main drawback, which is shared with all the approaches in this chapter, is that the Test Nexus functionality needs to be built by developers. Without the source code and ability to modify it, test authors can't implement this on their own. 
-3. The test app captioned below actually implements a version of the Test Nexus. All the links directly lead to different parts of the app. These happen to be human readable, which is intentional but is basically the same idea as what we've been considering here.
+
+The test app captioned below actually implements a version of the Test Nexus. All the links directly lead to different parts of the app. These happen to be human readable, which is intentional but is basically the same idea as what we've been considering here.
 
 <img width=300 src="https://user-images.githubusercontent.com/70295997/224534139-e8508938-d8c5-44a7-b60f-84da8123ec48.png">
-
-
 
 ## Shortcut to State #1
 *The dead simple "Test Nexus"*
