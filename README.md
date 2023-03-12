@@ -15,9 +15,17 @@ You can see a ton of buttons. The buttons don't even have readable names in thi
 
 Basically as app developers, we can attach whatever functionality we'd like to these buttons to make that functionality instantly available to test authors. For example, tapping one might go to the login form. Whereas tapping two might go to the logged in user area with a user already logged in, totally bypassing the login form. 
 
-We can create the possibility for the equivalent of variables here too. Tapping the A button might pop up a prompt for a username, and when entered, create a new user with that username but with all other details in their default value. Meaning we can create a custom new user without having to go through all the various signup forms. The possibilities are endless and limited only by your imagination and what the developers can build into the app at the tap of a button. 
+We can create the possibility for the equivalent of variables here too. Tapping the A button might pop up a prompt for a username, and when entered, create a new user with that username but with all other details in their default value. Meaning we can create a custom new user without having to go through all the various signup forms. The possibilities are endless and limited only by your imagination and what the developers can build into the app at the tap of a button.
 
-Let's look at the pros and cons of this approach. 
+#### Test Nexus Pros and Cons
+
+| Pros | Cons |
+| ---- | ---- |
+| Standard Appium API | Need a test only app |
+| Easy to add buttons | Devs need to build functions |
+| Quickest solution to build |  |
+
+
 
 **Pros**:
 1. One great thing is that from a test author perspective we're just dealing with tapping buttons using the standard Appium API, which makes using the Test Nexus dead simple for the automation. 
