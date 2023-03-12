@@ -12,7 +12,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Ch_04_03_Deep_Links {
     private static final String APP_ANDROID = "https://github.com/cloudgrey-io/the-app/releases/download/v1.9.0/TheApp-v1.9.0.apk";
-    private static final String APPIUM = "http://localhost:4723/wd/hub";
+    private static final String APPIUM = "http://localhost:4723";
 
     private AndroidDriver driver;
 
@@ -20,7 +20,7 @@ public class Ch_04_03_Deep_Links {
     public void setUp() throws Exception {
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("platformName", "Android");
-        caps.setCapability("platformVersion", "10");
+        caps.setCapability("platformVersion", "13");
         caps.setCapability("deviceName", "Android Emulator");
         caps.setCapability("automationName", "UiAutomator2");
         caps.setCapability("app", APP_ANDROID);
