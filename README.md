@@ -110,7 +110,78 @@ Let's look at the pros and cons of the deep link technique. 
 2. The developers also need to build out the functionality, which is triggered by accessing a deep link. 
 
 
-Okay, let's have a quick look at deep links in action. Because we've already looked at the single Appium command necessary for this to work, I'm just going to show how deep links can really simplify and speed up an Appium test. So now I'm looking at the file Ch_04_03_Deep_Links.java. It has all our usual boilerplate up top, just starting an Android session on the emulator. If we scroll down, we have two test cases here. One is called testLoginNormally and the implementation is the same as we have seen elsewhere in this course. It consists of the steps required to login as a certain user within the app, by clicking and typing in the UI. 
+Okay, let's have a quick look at deep links in action. Because we've already looked at the single Appium command necessary for this to work, I'm just going to show how deep links can really simplify and speed up an Appium test. So now I'm looking at the file Deep_Links.java. It has all our usual boilerplate up top, just starting an Android session on the emulator. If we scroll down, we have two test cases here. One is called testLoginNormally and the implementation is the same as we have seen elsewhere in this course. It consists of the steps required to login as a certain user within the app, by clicking and typing in the UI. 
+
+    import io.appium.java_client.MobileBy;
+    import io.appium.java_client.android.AndroidDriver;
+    import java.net.URL;
+    import java.util.concurrent.TimeUnit;
+    import org.junit.After;
+    import org.junit.Before;
+    import org.junit.Test;
+    import org.openqa.selenium.WebElement;
+    import org.openqa.selenium.remote.DesiredCapabilities;
+    import org.openqa.selenium.support.ui.ExpectedConditions;
+    import org.openqa.selenium.support.ui.WebDriverWait;
+
+    public class Deep_Links {
+        private static final String APP_ANDROID = "https://github.com/cloudgrey-io/the-app/releases/download/v1.9.0/TheApp-v1.9.0.apk";
+        private static final String APPIUM = "http://localhost:4723";
+
+        private AndroidDriver driver;
+
+        @Before
+        public void setUp() throws Exception {
+            DesiredCapabilities caps = new DesiredCapabilities();
+            caps.setCapability("platformName", "Android");
+            caps.setCapability("platformVersion", "13");
+            caps.setCapability("deviceName", "Android Emulator");
+            caps.setCapability("automationName", "UiAutomator2");
+            caps.setCapability("app", APP_ANDROID);
+            driver = new AndroidDriver(new URL(APPIUM), caps);
+            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        }
+
+        @After
+        public void tearDown() {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
+
+        @Test
+        public void testLoginNormally() {
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+
+            WebElement screen = wait.until(ExpectedConditions.presenceOfElementLocated(MobileBy.AccessibilityId("Login Screen")));
+            screen.click();
+
+            WebElement username = wait.until(ExpectedConditions.presenceOfElementLocated(MobileBy.AccessibilityId("username")));
+            username.sendKeys("alice");
+
+            WebElement password = driver.findElement(MobileBy.AccessibilityId("password"));
+            password.sendKeys("mypassword");
+
+            WebElement login = driver.findElement(MobileBy.AccessibilityId("loginBtn"));
+            login.click();
+
+            WebElement loginText = wait.until(ExpectedConditions.presenceOfElementLocated(
+                MobileBy.xpath("//android.widget.TextView[contains(@text, 'You are logged in')]")));
+
+            assert(loginText.getText().contains("alice"));
+        }
+
+        @Test
+        public void testLoginWithDeepLink() {
+            driver.get("theapp://login/alice/mypassword");
+
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            WebElement loginText = wait.until(ExpectedConditions.presenceOfElementLocated(
+                MobileBy.xpath("//android.widget.TextView[contains(@text, 'You are logged in')]")));
+
+            assert(loginText.getText().contains("alice"));
+        }
+    }
 
 You can see it's about 20 lines of code. The test method below is called <code>testloginWithDeepLink</code>, and it does the exact same thing as the previous test, only it uses a deep link to login, rather than using the UI. It makes the same verification, using the assert method at the end, but the test case is only five or six lines long. You can imagine that if we had many test cases, that all involved logging in at the beginning, having just one command here would save us lots of time, as well as lots of potentially duplicated code. Let's go ahead and run both of these tests, one after the other, so we can see for ourselves how much faster it is to use the deep link. So I'll go back up to the top, the test class. And run the entire test class here. We have our Android emulator open and the Appium server, starting sessions on the emulator. So now we're going to login normally using the UI. It's pretty quick. Not too slow. And now we're going to try again, using deep links. The app is up and we logged in immediately. I didn't even have time to say what was going on. You can see though that we did log in as the correct user. So that's it. All you need to do for deep links is build in the deep link API on the app side, and it has the potential to make your testing life quite a bit easier.
 
