@@ -195,9 +195,102 @@ Let's go ahead and run both of these tests, one after the other, so we can see 
 
 ## Shortcut to State #3: Application backdoors
 
-The final strategy we're going to discuss for quickly setting up app state is actually directly calling methods in your application source code from Appium. Since this strategy is not available to users, we call it *backdooring* because you're getting into the app from the backdoor, so to speak. Let's take a look at how it works. The basic idea here is that you may have methods inside your app which are purely internal bits of code. Some of these bits of code might do useful things like adding a user or performing another action that could save you time as a tester. Typically, you would not be able to access these internal methods from Appium because Appium can only automate the UI from the outside, just like a user. However, if you use Appium's Espresso driver, which is the newest of Appium's Android drivers you'll be working with Google's Espresso technology under the hood. Espresso is designed in such a way that it has access to application internals, which means that Appium via this driver can also have access to methods inside your app. Of course, to call any methods inside your app you'll need to know a lot of information about that method. For example, its name, where it's defined, for example, on the application class or the main activity class, and what kinds of arguments it takes. Once you do know all this information, you can call that internal method using a special Appium command called backdoor. Let's take a look at how this command works. First of all, let's assume that in my Android app I have a method that looks like this on my main application class. It's called raiseToast and it takes a string as a parameter. What the app does with this string is create something called a toast, which is like a little temporary notice that shows up on the Android screen. Remember, this is code that is in my application itself, not in my test suite. I only know about this code because I can read the source of my application and see that it's there. It might not be in any way directly accessible to users. And by the way, this is what a toast looks like when it's raised on an Android device. So if we call the raiseToast method this is what would happen on the screen. Ultimately, what our Appium Java client needs to do in order to make all of this happen is to encode all the necessary information about the raiseToast method in JSON and send it to the Appium server. So let's have a look at what needs to be sent. And this is an example of the JSON object that needs to be sent to Appium in order to trigger the raiseToast method. It describes where the method is hosted, namely on the application. We then have an opportunity to call a whole set of methods but we'll call just one. We have to provide the name which is raiseToast then we have to tell Appium what arguments to call this method with. The args value is therefore an array of other objects, each one of which is described as a Java type and has a value. In this case, we're trying to call the raiseToast method with the message, "Hello from the test script." Thankfully, we don't have to construct this JSON by hand but we do have to create the equivalent structure in Java. So what we really want to call in our test code is something like this. Here we define a series of lists and maps that encode all of the same information but as a Java object with multiple levels. Then we pass this object to the mobile: backdoor command as the argument to the executeScript call. Okay, let's look at a quick demo but first let's talk about the pros and cons of this approach. One great thing about backdooring is that as long as we can read the source ourselves we might not need to built any extra functionality into the app to support it. If the methods we need already exist we can can just call them. Secondly, we are not limited to what can be done from the UI. We have access to the app's internals, which gives us a lot of potential power. And this is also a very fast strategy because we're not going through the UI at all and it's just a single Appium command taking place. The main frustration here is that this is not a cross-platform solution. We don't have any way to access app internals from an iOS test context and this only works on Android, likewise this test method is only possible with the Espresso driver. It won't work with the older drivers. All that being said, let's have a quick look at how this works in practice. Okay, let's take a look at a code sample illustrating the backdoor method. 
+The final strategy we're going to discuss for quickly setting up app state is actually directly calling methods in your application source code from Appium. Since this strategy is not available to users, we call it *backdooring* because you're getting into the app from the backdoor, so to speak. Let's take a look at how it works. 
 
-I'm going to open the [App_Backdoor.java](https://github.com/lana-20/appium-test-nexus/blob/main/App_Backdoor.java) file. Most of the file is our usual setup for an Android test. The one important difference for setup is in the desired capabilities section. Look with me at line 23, where we've changed the automation name capability. Usually it's been UiAutomator2 but now we've declared that it should be Espresso. And this tells Appium that we want to use the Espresso driver for this particular test. Remember, we're doing this because the backdoor command is available only within the Espresso driver. Now let's scroll down to the test method called testBackdoor. You can see that I basically pasted in what we saw on the slide earlier. The construction of our backdoor data using a bunch of maps and arrays declaring that we want to raise a toast with the message, "Hello from the test script." We then pass this data object into the call to the mobile backdoor command and finally I've added a Thread.sleep here so that the app stays long enough for us to visually notice the toast message popping up. Well, let's give this test script a whirl. I'll load up my Android emulator and the Appium server logs, so we can watch the test proceeding. Session start will take a little bit longer because we're running a new driver, in this case, the Espresso driver. Once it launches, we'll see the "Hello from the test script" message and indeed we did. What this means of course is that we were able to successfully call a method written in the Java source code of our app all the way from our test script and that's pretty fun.
+The basic idea here is that you may have methods inside your app which are purely internal bits of code. Some of these bits of code might do useful things like adding a user or performing another action that could save you time as a tester. Typically, you would not be able to access these internal methods from Appium because Appium can only automate the UI from the outside, just like a user. However, if you use Appium's **Espresso driver**, which is the newest of Appium's Android drivers you'll be working with Google's Espresso technology under the hood. Espresso is designed in such a way that it has access to application internals, which means that Appium via this driver can also have access to methods inside your app. 
 
+Of course, to call any methods inside your app you'll need to know a lot of information about that method. For example, its name, where it's defined, for example, on the application class or the main activity class, and what kinds of arguments it takes. Once you do know all this information, you can call that internal method using a special Appium command called <code>backdoor</code>. Let's take a look at how this command works. 
+
+<img width="500" src="https://user-images.githubusercontent.com/70295997/224580544-ee07f77a-241a-4874-a12a-09909b1c84f3.png">
+
+First of all, let's assume that in my Android app I have a method that looks like this on my main application class. It's called <code>raiseToast</code> and it takes a string as a parameter. What the app does with this string is create something called a toast, which is like a little temporary notice that shows up on the Android screen. Remember, this is code that is in my application itself, not in my test suite. I only know about this code because I can read the source of my application and see that it's there. It might not be in any way directly accessible to users. And by the way, this is what a toast looks like when it's raised on an Android device. 
+
+<img width="350" src="https://user-images.githubusercontent.com/70295997/224580581-ae237274-3270-4669-9d6a-4809065cf662.png">
+
+So if we call the <code>raiseToast</code> method this is what would happen on the screen. Ultimately, what our Appium Java client needs to do in order to make all of this happen is to encode all the necessary information about the <code>raiseToast</code> method in JSON and send it to the Appium server. So let's have a look at what needs to be sent. 
+
+<img width="600" src="https://user-images.githubusercontent.com/70295997/224580681-deb83866-268f-41b1-be20-8feac7fc0aaa.png">
+
+And this is an example of the JSON object that needs to be sent to Appium in order to trigger the raiseToast method. It describes where the method is hosted, namely on the <code>application</code>. We then have an opportunity to call a whole set of <code>methods</code> but we'll call just one. We have to provide the <code>name</code> which is <code>raiseToast</code> then we have to tell Appium what arguments to call this method with. The <code>args</code> value is therefore an array of other objects, each one of which is described as a Java <code>type</code> and has a <code>value</code>. In this case, we're trying to call the <code>raiseToast</code> method with the message, <code>"Hello from the test script!"</code> 
+
+Thankfully, we don't have to construct this JSON by hand but we do have to create the equivalent structure in Java. So what we really want to call in our test code is something like this.
+
+<img width="600" src="https://user-images.githubusercontent.com/70295997/224580689-bd291020-ec2c-462d-a0f2-49f193b72d16.png">
+
+Here we define a series of lists and maps that encode all of the same information but as a Java object with multiple levels. Then we pass this object to the <code>mobile: backdoor</code> command as the argument to the <code>executeScript</code> call. 
+
+Let's talk about the pros and cons of this approach. 
+
+1. One great thing about backdooring is that as long as we can read the source ourselves we might not need to built any extra functionality into the app to support it. If the methods we need already exist we can can just call them. 
+2. Secondly, we are not limited to what can be done from the UI. We have access to the app's internals, which gives us a lot of potential power. 
+3. And this is also a very fast strategy because we're not going through the UI at all and it's just a single Appium command taking place. 
+
+1. The main frustration here is that this is not a cross-platform solution. We don't have any way to access app internals from an iOS test context and this only works on Android.
+2. Likewise this test method is only possible with the Espresso driver. It won't work with the older drivers. All that being said, let's have a quick look at how this works in practice. 
+
+#### Practical Example
+
+Let's take a look at a code sample illustrating the backdoor method. 
+
+I'm going to open the [App_Backdoor.java](https://github.com/lana-20/appium-test-nexus/blob/main/App_Backdoor.java) file. 
+
+    import com.google.common.collect.ImmutableMap;
+    import io.appium.java_client.android.AndroidDriver;
+    import java.net.URL;
+    import java.util.Arrays;
+    import java.util.concurrent.TimeUnit;
+    import org.junit.After;
+    import org.junit.Before;
+    import org.junit.Test;
+    import org.openqa.selenium.remote.DesiredCapabilities;
+
+    public class App_Backdoor {
+        private static final String APP_ANDROID = "https://github.com/cloudgrey-io/the-app/releases/download/v1.9.0/TheApp-v1.10.0.apk";
+        private static final String APPIUM = "http://localhost:4723";
+
+        private AndroidDriver driver;
+
+        @Before
+        public void setUp() throws Exception {
+            DesiredCapabilities caps = new DesiredCapabilities();
+            caps.setCapability("platformName", "Android");
+            caps.setCapability("platformVersion", "13");
+            caps.setCapability("deviceName", "Android Emulator");
+            caps.setCapability("automationName", "Espresso");
+            caps.setCapability("app", APP_ANDROID);
+            driver = new AndroidDriver(new URL(APPIUM), caps);
+            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        }
+
+        @After
+        public void tearDown() {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
+
+        @Test
+        public void testBackdoor() throws InterruptedException {
+            ImmutableMap<String, Object> scriptArgs = ImmutableMap.of(
+                "target", "application",
+                "methods", Arrays.asList(ImmutableMap.of(
+                    "name", "raiseToast",
+                    "args", Arrays.asList(ImmutableMap.of(
+                        "value", "Hello from the test script!",
+                        "type", "String"
+                    ))
+                ))
+            );
+
+            driver.executeScript("mobile: backdoor", scriptArgs);
+            Thread.sleep(3000);
+        }
+    }
+
+Most of the file is our usual setup for an Android test. The one important difference for setup is in the desired capabilities section. Look at line 23, where we've changed the automation name capability. Usually it's been <code>UiAutomator2</code> but now we've declared that it should be <code>Espresso</code>. And this tells Appium that we want to use the Espresso driver for this particular test. Remember, we're doing this because the *backdoor command is available only within the Espresso driver*. 
+
+Now let's scroll down to the test method called <code>testBackdoor</code>. You can see that I basically pasted in the construction of our backdoor data using a bunch of maps and arrays declaring that we want to raise a toast with the message, "Hello from the test script." We then pass this data object into the call to the <code>mobile: backdoor</code> command and finally I've added a <code>Thread.sleep</code> here so that the app stays long enough for us to visually notice the toast message popping up. Well, let's give this test script a whirl. I'll load up my Android emulator and the Appium server logs, so we can watch the test proceeding. Session start will take a little bit longer because we're running a new driver, in this case, the Espresso driver. Once it launches, we'll see the "Hello from the test script" message and indeed we did. What this means of course is that we were able to successfully call a method written in the Java source code of our app all the way from our test script and that's pretty fun.
+
+<img width="800" src="https://user-images.githubusercontent.com/70295997/224581354-11b6b220-3ac5-46f5-9c5b-39bc8dadd00d.png">
 
 
