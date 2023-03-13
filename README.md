@@ -4,7 +4,6 @@
 
 <img width="600" src="https://user-images.githubusercontent.com/70295997/224533611-e0b52244-e41f-467f-9330-c38c9774af82.png">
 
-
 #### Waiting for app state: Theory
 
 I'd like to introduce the first technique I recommend for speeding up state setup. It's called the *Test Nexus*. The Test Nexus is basically a special initial application view that only gets loaded during app testing. The Test Nexus should never be shipped to customers, of course. The main idea is that on this one view are lots and lots of buttons. Each button takes you to a different place in the application. So rather than tapping through the app like a regular user, you can just tap one button and you've transported magically to a far-away place in your app that might have taken a long time to get to if you were a regular user. The real value of the Test Nexus becomes clear when you realize that you can have buttons which not only take you somewhere new, but which also trigger various kinds of setup to happen for you automatically, that would normally take a lot of UI interaction. Imagine that the Test Nexus looks something like this. 
@@ -25,8 +24,6 @@ We can create the possibility for the equivalent of variables here too. Tappin
 | Easy to add buttons | Devs need to build functions |
 | Quickest solution to build |  |
 
-
-
 **Pros**:
 1. One great thing is that from a test author perspective we're just dealing with tapping buttons using the standard Appium API, which makes using the Test Nexus dead simple for the automation. 
 2. The Test Nexus is also really easy to expand. You just keep making the Nexus view longer, adding more buttons. 
@@ -42,6 +39,8 @@ The test app captioned below actually implements a version of the Test Nexus. A
 
 ## Shortcut to State #1
 *The dead simple "Test Nexus"*
+
+The Test Nexus requires only standard Appium element searches and interactions from the test code perspective. Test Nexus portals are just buttons, which can be interacted with easily using the standard API.
 
 Test Nexus |
 ---- |
@@ -91,6 +90,8 @@ The only question left is, how do we trigger such deep links in Appium? Assumi
 <img width="600" src="https://user-images.githubusercontent.com/70295997/224576678-30a58f56-6507-44a6-8640-8280d2979657.png">
 
 ### Deep Links Pros and Cons
+
+A Deep Limk URL can contain arbitrary content. One benefit of it is that custom APIs can be developed using Deep Link URLs, allowing for parameters to be passed in. Since URLs are just a bunch of text, you can design a full-fledged API including passing in parameters to certain methods.
 
 | Pros | Cons |
 | ---- | ---- |
@@ -207,6 +208,8 @@ First of all, let's assume that in my Android app I have a method that looks li
 
 <img width="350" src="https://user-images.githubusercontent.com/70295997/224580581-ae237274-3270-4669-9d6a-4809065cf662.png">
 
+The argument that should be passed into the invocation of <code>driver.executeScript("mobile: backdoor")</code> is a Map defining a complex object specifying the name and details of the in-app method to call. This Map is turned into a JSON object and interpreted by the Appium server.
+
 So if we call the <code>raiseToast</code> method this is what would happen on the screen. Ultimately, what our Appium Java client needs to do in order to make all of this happen is to encode all the necessary information about the <code>raiseToast</code> method in JSON and send it to the Appium server. So let's have a look at what needs to be sent. 
 
 <img width="600" src="https://user-images.githubusercontent.com/70295997/224580681-deb83866-268f-41b1-be20-8feac7fc0aaa.png">
@@ -221,10 +224,18 @@ Here we define a series of lists and maps that encode all of the same informati
 
 Let's talk about the pros and cons of this approach. 
 
+| Pros | Cons |
+| ---- | ---- |
+| No extra dev work | Android only |
+| Total app access | Espresso only |
+| Imstamt |  |
+
+#### Pros
 1. One great thing about backdooring is that as long as we can read the source ourselves we might not need to built any extra functionality into the app to support it. If the methods we need already exist we can can just call them. 
 2. Secondly, we are not limited to what can be done from the UI. We have access to the app's internals, which gives us a lot of potential power. 
 3. And this is also a very fast strategy because we're not going through the UI at all and it's just a single Appium command taking place. 
 
+#### Cons
 1. The main frustration here is that this is not a cross-platform solution. We don't have any way to access app internals from an iOS test context and this only works on Android.
 2. Likewise this test method is only possible with the Espresso driver. It won't work with the older drivers. All that being said, let's have a quick look at how this works in practice. 
 
