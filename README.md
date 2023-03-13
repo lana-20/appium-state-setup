@@ -241,9 +241,7 @@ Let's talk about the pros and cons of this approach. 
 
 #### Practical Example
 
-Let's take a look at a code sample illustrating the backdoor method. 
-
-I'm going to open the [App_Backdoor.java](https://github.com/lana-20/appium-test-nexus/blob/main/App_Backdoor.java) file. 
+Let's take a look at the [App_Backdoor.java](https://github.com/lana-20/appium-test-nexus/blob/main/App_Backdoor.java) file illustrating the backdoor method. 
 
     import com.google.common.collect.ImmutableMap;
     import io.appium.java_client.android.AndroidDriver;
