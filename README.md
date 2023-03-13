@@ -4,6 +4,13 @@
 
 <img width="600" src="https://user-images.githubusercontent.com/70295997/224533611-e0b52244-e41f-467f-9330-c38c9774af82.png">
 
+#### Table of Contents
+- [Waiting for app state: Theory](https://github.com/lana-20/appium-state-setup#waiting-for-app-state-theory)
+- [Application State](https://github.com/lana-20/appium-state-setup#application-state)
+- [Shortcut to State #1: Test Nexus](https://github.com/lana-20/appium-state-setup#shortcut-to-state-1-test-nexus)
+- [Shortcut to State #2: Deep links](https://github.com/lana-20/appium-state-setup#shortcut-to-state-2-deep-links)
+- [Shortcut to State #3: Application backdoors](https://github.com/lana-20/appium-state-setup#shortcut-to-state-3-application-backdoors)
+
 #### Waiting for app state: Theory
 
 I'd like to introduce the first technique I recommend for speeding up state setup. It's called the *Test Nexus*. The Test Nexus is basically a special initial application view that only gets loaded during app testing. The Test Nexus should never be shipped to customers, of course. The main idea is that on this one view are lots and lots of buttons. Each button takes you to a different place in the application. So rather than tapping through the app like a regular user, you can just tap one button and you've transported magically to a far-away place in your app that might have taken a long time to get to if you were a regular user. The real value of the Test Nexus becomes clear when you realize that you can have buttons which not only take you somewhere new, but which also trigger various kinds of setup to happen for you automatically, that would normally take a lot of UI interaction. Imagine that the Test Nexus looks something like this. 
@@ -37,7 +44,7 @@ The test app captioned below actually implements a version of the Test Nexus. A
 
 <img width=300 src="https://user-images.githubusercontent.com/70295997/224534139-e8508938-d8c5-44a7-b60f-84da8123ec48.png">
 
-## Shortcut to State #1
+## Shortcut to State #1: Test Nexus
 *The dead simple "Test Nexus"*
 
 The Test Nexus requires only standard Appium element searches and interactions from the test code perspective. Test Nexus portals are just buttons, which can be interacted with easily using the standard API.
@@ -192,7 +199,6 @@ The test method below is called <code>testloginWithDeepLink</code>, and it does
 You can imagine that if we had many test cases, that all involved logging in at the beginning, having just one command here would save us lots of time, as well as lots of potentially duplicated code. 
 
 Let's go ahead and run both of these tests, one after the other, so we can see for ourselves how much faster it is to use the deep link. So I'll go back up to the top, the test class. And run the entire test class here. We have our Android emulator open and the Appium server, starting sessions on the emulator. Then we're going to login normally using the UI. It's pretty quick, not too slow. And now we're going to try again, using deep links. The app is up and we logged in immediately. I didn't even have time to see what was going on. You can see though that we did log in as the correct user. So that's it. All you need to do for deep links is **build in the deep link API on the app side**, and it has the potential to make your testing life quite a bit easier.
-
 
 ## Shortcut to State #3: Application backdoors
 
